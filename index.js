@@ -15,24 +15,42 @@ const run = async () => {
     try{
       await client.connect();
       const inventoryCollection = client.db('camping-gear').collection('items');
-      const servicesCollection = client.db('camping-gear').collection('services');
+
      app.get('/product',async(req,res) => {
         const query = {}
         const cursor = inventoryCollection.find(query)
         const products = await cursor.toArray()
         res.send(products)
      })
+
      app.get('/product/home',async(req,res) => {
         const query = {}
         const cursor = inventoryCollection.find(query)
         const products = await cursor.limit(6).toArray()
         res.send(products)
      })
-     app.get('/services',async(req,res) => {
-        const query = {}
-        const cursor = servicesCollection.find(query)
-        const products = await cursor.toArray()
-        res.send(products)
+
+     app.delete('/product/:id',async(req,res)=>{
+        const id = req.params.id;
+        const query = {_id:ObjectId(id)}
+        const result = await inventoryCollection.deleteOne(query)
+        res.send(result)
+     })
+
+     app.post('/product' , async (req,res)=>{
+        const newItem = req.body;
+        console.log('adding new user' , newItem)
+        const addItem = await inventoryCollection.insertOne(newItem)
+         res.send(addItem)
+     })
+     
+     app.get('/product',async (req,res) =>{
+        const email = req.query;
+        console.log(email);
+      //   const query = {email:email}
+      //   const cursor = inventoryCollection.find(query) 
+      //   const services = await cursor.toArray()
+      //   res.send(services)
      })
 
         app.get('/inventory/:id', async(req,res) => {
@@ -44,7 +62,7 @@ const run = async () => {
           })
      app.put('/inventory/:id', async(req,res) => {
         const id = req.params.id;
-        const newQuantity = req.headers.newQuantity;
+        const newQuantity = req.headers.quantitys;
         console.log(newQuantity)
         const cursor = {_id:ObjectId(id)};
         const options = {upsert:true};
