@@ -17,6 +17,7 @@ const run = async () => {
       const inventoryCollection = client.db('camping-gear').collection('items');
 
      app.get('/product',async(req,res) => {
+      console.log("hos na k");
         const query = {}
         const cursor = inventoryCollection.find(query)
         const products = await cursor.toArray()
@@ -43,14 +44,14 @@ const run = async () => {
         const addItem = await inventoryCollection.insertOne(newItem)
          res.send(addItem)
      })
-     
-     app.get('/product',async (req,res) =>{
-        const email = req.query;
-        console.log(email);
-      //   const query = {email:email}
-      //   const cursor = inventoryCollection.find(query) 
-      //   const services = await cursor.toArray()
-      //   res.send(services)
+
+     app.get('/products',async (req,res) =>{
+        const email = req.query.email;
+        
+        const query = {email:email}
+        const cursor = inventoryCollection.find(query) 
+        const services = await cursor.toArray()
+        res.send(services)
      })
 
         app.get('/inventory/:id', async(req,res) => {
