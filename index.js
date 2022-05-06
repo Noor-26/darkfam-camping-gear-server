@@ -3,10 +3,27 @@ const cors = require('cors');
 require('dotenv').config()
 const port = process.env.PORT || 5000;
 const app = express()
+const  jwt =require('jsonwebtoken');
 
 app.use(cors())
 app.use(express.json())
 
+
+function verifyCode(req,res,next){
+    const authCode = req.headers.authorization;
+    if(!authCode){
+      return res.status(401).send({message:'Please login again'})
+    }
+    const token = authCode.split(' ')[1]
+    jwt.verify(token,process.env.ACCESS_TOKEN,(err,decoded) => {
+      if(err){
+        return res.status(403).send({message : "go to your home"})
+      }
+      console.log("decoded message" , decoded);
+      req.decoded = decoded
+      next()
+    })
+  }
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.tq1da.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
@@ -17,7 +34,7 @@ const run = async () => {
       const inventoryCollection = client.db('camping-gear').collection('items');
 
      app.get('/product',async(req,res) => {
-      console.log("hos na k");
+
         const query = {}
         const cursor = inventoryCollection.find(query)
         const products = await cursor.toArray()
@@ -40,18 +57,30 @@ const run = async () => {
 
      app.post('/product' , async (req,res)=>{
         const newItem = req.body;
-        console.log('adding new user' , newItem)
+        console.log('adding new item' , newItem)
         const addItem = await inventoryCollection.insertOne(newItem)
          res.send(addItem)
      })
 
-     app.get('/products',async (req,res) =>{
-        const email = req.query.email;
-        
+     app.post('/login',async (req,res)=>{
+        const user = req.body;
+        const accessToken = jwt.sign(user,process.env.ACCESS_TOKEN , {expiresIn:'1d'})
+        res.send(accessToken)
+     })
+     app.get('/products', verifyCode, async (req,res) =>{
+    const email = req.query.email;
+    const decoded = req.decoded.email
+    
+    console.log(email,decoded);
+     if(email === decoded){
         const query = {email:email}
         const cursor = inventoryCollection.find(query) 
-        const services = await cursor.toArray()
-        res.send(services)
+        const items = await cursor.toArray()
+        res.send(items)
+    }
+    else{
+      res.status(403).send({message : 'You cannot enter'})
+    }
      })
 
         app.get('/inventory/:id', async(req,res) => {
