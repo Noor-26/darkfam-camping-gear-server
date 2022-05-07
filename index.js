@@ -17,7 +17,7 @@ function verifyCode(req,res,next){
     const token = authCode.split(' ')[1]
     jwt.verify(token,process.env.ACCESS_TOKEN,(err,decoded) => {
       if(err){
-        return res.status(403).send({message : "go to your home"})
+        return res.status(403).send({message : "you can't go in there"})
       }
       console.log("decoded message" , decoded);
       req.decoded = decoded
