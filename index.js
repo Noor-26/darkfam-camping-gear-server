@@ -67,13 +67,13 @@ const run = async () => {
     const decoded = req.decoded.email
     
      if(email === decoded){
-        const query = {email:email}
+        const query = {email:email }
         const cursor = inventoryCollection.find(query)  
         const items = await cursor.toArray()
         res.send(items)
     }
     else{
-      res.status(403).send({message : 'You cannot enter'})
+      res.status(403).send({message : 'You cannot enter in the website'})
     }
      })
      app.post('/login',async (req,res)=>{
