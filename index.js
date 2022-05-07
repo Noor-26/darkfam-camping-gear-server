@@ -62,19 +62,13 @@ const run = async () => {
          res.send(addItem)
      })
 
-     app.post('/login',async (req,res)=>{
-        const user = req.body;
-        const accessToken = jwt.sign(user,process.env.ACCESS_TOKEN , {expiresIn:'1d'})
-        res.send(accessToken)
-     })
      app.get('/products', verifyCode, async (req,res) =>{
     const email = req.query.email;
     const decoded = req.decoded.email
     
-    console.log(email,decoded);
      if(email === decoded){
         const query = {email:email}
-        const cursor = inventoryCollection.find(query) 
+        const cursor = inventoryCollection.find(query)  
         const items = await cursor.toArray()
         res.send(items)
     }
@@ -82,7 +76,11 @@ const run = async () => {
       res.status(403).send({message : 'You cannot enter'})
     }
      })
-
+     app.post('/login',async (req,res)=>{
+      const user = req.body;
+      const accessToken = jwt.sign(user,process.env.ACCESS_TOKEN )
+      res.send(accessToken)
+   })
         app.get('/inventory/:id', async(req,res) => {
             const id = req.params.id;
             const query = {_id:ObjectId(id)}
